@@ -1,0 +1,137 @@
+---
+title: "ClassSurvey"
+author: "Harry"
+date: "2025-08-27"
+output: html_document
+---
+
+```{r}
+# install.packages("readr") 
+library(readr)
+```
+
+1. Import class one survey data from our Github site (https://github.com/kijohnson/Advanced-Data-Analysis) (The dataset is called ‘Class 1 Survey Fall 2025 2.csv’), calling the R dataframe that you create C1survey.
+
+
+```{r}
+ClassSurv <- read_csv("https://github.com/kijohnson/Advanced-Data-Analysis/raw/refs/heads/main/Class%201%20Survey%20Fall%202025%202.csv")
+```
+2. Determine: a. the number of observations (i.e. the number of people who filled out the survey) and b. the number of variables in the dataframe.
+```{r}
+dim(ClassSurv)
+```
+3. a. Rename the column variables to something shorter and that is descriptive of what the variable is about (for example like_dogs for the ‘Do you like dogs?’ question variable) and b. Display that they are renamed. Hints: You can use either the rename_with function or the names function. The list of names for time is:
+```{r}
+install.packages("dplyr")
+library(dplyr)
+```
+```{r}
+colnames(ClassSurv)
+```
+
+
+```{r}
+names(ClassSurv) <- c("id", "like_cats", "like_dogs", "have_desert", "slogan", "fav_day", "larkORowl", "fav_food", "fav_drink", "fav_season", "fav_month", "hobby", "program", "specialization", "stat_software", "R_exp", "coding_comfort", "coding_length", "top_three", "public_health_interest", "fav_num", "bday", "bmonth", "country", "state", "city",  "highest_educ_level")
+```
+
+4. Write code to determine and display the number of factor, integer, numerical, and character variables there are in the C1survey dataset.
+```{r}
+num_factors <- sum(sapply(ClassSurv, is.factor))
+num_integers <- sum(sapply(ClassSurv, is.integer))
+num_numerics <- sum(sapply(ClassSurv, is.numeric))
+num_characters <- sum(sapply(ClassSurv, is.character))
+```
+
+```{r}
+type_counts <- c(
+  Factors    = sum(sapply(ClassSurv, is.factor)),
+  Integers   = sum(sapply(ClassSurv, is.integer)),
+  Numerics   = sum(sapply(ClassSurv, is.numeric)),
+  Characters = sum(sapply(ClassSurv, is.character))
+)
+
+# Print counts directly
+print(type_counts)
+```
+
+a. Using code, check the bday and bmonth variables for any unusual or missing values (hint: use table function). If you find any,
+```{r}
+table(ClassSurv$bday, useNA = "ifany")
+table(ClassSurv$bmonth, useNA = "ifany")
+
+```
+ b. describe what you will do with the unusual values in a comment before or immediately following the code that does it,
+If unusual values are found, we will replace them with NA ,so they can be treated as missing rather than incorrect data.
+```{r}
+unique(ClassSurv$bday[!(ClassSurv$bday %in% 1:31)])
+unique(ClassSurv$bmonth[!(ClassSurv$bmonth %in% 1:12)])
+ClassSurv$bday[!(ClassSurv$bday %in% 1:31)] <- NA
+ClassSurv$bmonth[!(ClassSurv$bmonth %in% 1:12)] <- NA
+```
+
+c. after you have cleaned up any unusual values, find the median bday and month. *Note: please make sure that your bday and month variables are numeric before doing statistics
+```{r}
+ClassSurv$bday <- as.numeric(ClassSurv$bday)
+ClassSurv$bmonth <- as.numeric(ClassSurv$bmonth)
+
+```
+
+```{r}
+median_bday <- median(ClassSurv$bday, na.rm = TRUE)
+median_bmonth <- median(ClassSurv$bmonth, na.rm = TRUE)
+median_bday
+median_bmonth
+```
+
+6. a. Create a new variable called bseason that gives the season according to Northern Meteorological season in which respondents were born (winter = 12/1 to 2/29, spring = 3/1 to 5/31, summer = 6/1 to 8/31, fall = 9/1 to 11/30).
+```{r}
+ClassSurv$bseason <- with(ClassSurv,
+  ifelse(bmonth %in% c(12, 1, 2), "Winter",
+  ifelse(bmonth %in% 3:5, "Spring",
+  ifelse(bmonth %in% 6:8, "Summer",
+  ifelse(bmonth %in% 9:11, "Fall", NA)))))
+```
+```{r}
+ClassSurv$bseason <- factor(ClassSurv$bseason, 
+                            levels = c("Winter", "Spring", "Summer", "Fall"))
+```
+
+b. Using the table function, print a table of Seasons in the columns and bmonths in the rows that allows you to check that the coding is correct 
+
+```{r}
+table(ClassSurv$bmonth, ClassSurv$bseason)
+```
+```{r}
+ClassSurv$bmonth <- factor(ClassSurv$bmonth, levels = 1:12)
+table(ClassSurv$bmonth, ClassSurv$bseason)
+```
+
+c. Sum the columns using the addmargins function to answer the question of how many classmates were born in each season? Include your answer in the code.
+```{r}
+tab <- table(ClassSurv$bmonth, ClassSurv$bseason)
+addmargins(tab)
+```
+Winter = 8
+Spring = 15
+Summer = 13
+Fall = 12
+
+
+7. Pick your favorite variable or variables to analyze, come up with a question you want to answer with that variable or variables, generate the code, and provide an answer to your question. Describe what you did using comments (i.e. #’s).
+
+Which birth season has the highest number of medical doctors?
+Variables - bseason. highest_educ_levelt
+
+a, I created a cross table of brith season agaiinst highest_educ_level
+```{r}
+season_vs_education <- table(ClassSurv$bseason, ClassSurv$highest_educ_level, useNA = "ifany")
+```
+
+b. I used the code below to produce the table to see raw counts
+```{r}
+season_vs_education
+```
+Answer = Fall 
+
+
+
